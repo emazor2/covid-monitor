@@ -7,6 +7,26 @@ from werkzeug.utils import secure_filename
 conn = psycopg2.connect("host=localhost dbname=postgres user=postgres")
 cur = conn.cursor()
 
+# create database tables:
+
+# CONFIRMED
+cur.execute("""
+	CREATE TABLE confirmed(
+		UID integer PRIMARY KEY,
+		Province_State text,
+		Country_Region text,
+		Combined_Key text,
+
+	)
+		
+	""")
+
+# ACTIVE
+
+# RECOVERED
+	
+# DEATHS
+
 UPLOAD_FOLDER = '/files'
 ALLOWED_EXTENSIONS = {'csv'}
 
@@ -65,6 +85,15 @@ def send_to_db(file):
 if __name__ == "__main__":
 	app.run(debug=True)
 
-	# interact with user
-	# file_type = input("Enter 'Time Series' or 'Daily Report': ")
-	# country = input("")
+	# create database tables:
+
+	# # time series US
+	# CREATE TABLE timeSeriesUS(
+
+	# )
+
+	# time series GLOBAL
+
+	# daily report US
+
+	# daily report GLOBAL
