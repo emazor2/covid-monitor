@@ -4,22 +4,23 @@ import psycopg2
 from flask import Flask, redirect, render_template, jsonify, flash, request, url_for
 from werkzeug.utils import secure_filename
 
-conn = psycopg2.connect("host=localhost dbname=postgres user=postgres")
-cur = conn.cursor()
+# conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres")
+# cur = conn.cursor()
 
 # create database tables:
+# ASSUMPTION: for each category (confirmed, active, etc.) user initially uploads a time series file (to populate that table in the database). If a time series file for each category has been uploaded, then daily report files can be uploaded. Daily report files can only be uploaded for days already in the time series (although this won't make any difference to the database) or one day ahead to update the time series. Any time series file can be uploaded at any point in time.
 
 # CONFIRMED
-cur.execute("""
-	CREATE TABLE confirmed(
-		UID integer PRIMARY KEY,
-		Province_State text,
-		Country_Region text,
-		Combined_Key text,
+# cur.execute("""
+# 	CREATE TABLE confirmed(
+# 		UID integer PRIMARY KEY,
+# 		Province_State text,
+# 		Country_Region text,
+# 		Combined_Key text,
+# 	)
 
-	)
 		
-	""")
+# 	""")
 
 # ACTIVE
 
@@ -51,16 +52,16 @@ def upload():
 	# return file.filename
 	# TODO: use user input to determine file type
 	# parse file data and send to database
-	send_to_db(file)
+	# send_to_db(file)
 
 # send data to database
-def send_to_db(file):
-    with open(file, 'r') as f:
-        # skip header
-        next(f)
-        # copy csv to database
-        cur.copy_from(f, '', sep=',')
-    conn.commit()
+# def send_to_db(file):
+#     with open(file, 'r') as f:
+#         # skip header
+#         next(f)
+#         # copy csv to database
+#         cur.copy_from(f, '', sep=',')
+#     conn.commit()
 	
 
 # def upload_file():
