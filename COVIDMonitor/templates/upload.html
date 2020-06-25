@@ -1,0 +1,22 @@
+<html>
+   <body>
+      <form action = "http://localhost:5000/uploader" method = "POST"
+         enctype = "multipart/form-data">
+         <input type = "file" name = "file" required/>
+         <fieldset>
+            <legend>Is your file Time series or Daily?</legend>
+            <input type="radio" name="file_type" value="time" required> Time Series<br>
+            <input type="radio" name="file_type" value="daily"> Daily<br>
+         </fieldset>
+         <fieldset>
+            <legend>What type of data is in the file?</legend>
+            <input type="radio" name="data_type" value="deaths" required> Deaths<br>
+            <input type="radio" name="data_type" value="confirmed" > Confirmed<br>
+            <input type="radio" name="data_type" value="active" > Active<br>
+            <input type="radio" name="data_type" value="recovered" > Recovered<br>
+            <input type="radio" name="data_type" value="all"> All (choose if daily file)<br>
+         </fieldset>
+         <input type = "submit"/>
+      </form>
+   </body>
+</html>

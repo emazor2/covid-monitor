@@ -1,0 +1,28 @@
+<html>
+   <body>
+      <form action = "http://localhost:5000/query" method = "POST"
+         enctype = "multipart/form-data">
+         <fieldset>
+             <legend>Choose a data to query:</legend>
+             <input type="radio" name="query_type" value="deaths" required> Country/Region<br>
+             <input type="radio" name="query_type" value="confirmed"> State/Province<br>
+             <input type="radio" name="query_type" value="active"> Combined Key<br>
+             <input type="radio" name="query_type" value="recovered"> Combined Key<br>
+         </fieldset>
+          <fieldset>
+              <legend>Input keys to query by.</legend>
+              If multiple keys in one input, separate with /.
+              For example, if you would like to query by multiple countries Canada and Mexico input: Canada/Mexico <br>
+              <input type="text" name="countries"> Countries/Regions<br>
+              <input type="text" name="states"> States/Provinces<br>
+              <input type="text" name="combined"> Combined keys<br>
+          </fieldset>
+         <fieldset>
+            <legend>Choose a date range:</legend>
+            <input type="date" name="date_start" value="date_start" > Start of date range<br>
+            <input type="date" name="date_end" value="date_end" > End of date range<br>
+         </fieldset>
+         <input type = "submit"/>
+      </form>
+   </body>
+</html>
