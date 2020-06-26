@@ -4,8 +4,9 @@ from io import TextIOWrapper
 import csv
 import re
 import datetime
+import json
 
-app = Flask("Assignment 2")
+app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/uploaded_files'
 client = MongoClient('localhost', 27017)
 
@@ -99,12 +100,44 @@ def query():
 
         db = client.a2test
         collection = db[query_type]
+
+        all_data = []
         
-        # check if query is by country/region (no provinces/states specified)
-        # if len(all_states) == 0:
+        # check if query is by country/region, state/province, or combined_key
+        if len(all_states) != 0:
+            for state in all_states:
+                data_dict = {"Province_State": state}
+                all_data.append(data_dict)
+                
+        if len(all_countries) != 0:
+            for country in all_countries:
+                data_dict = {"Country_Region": country}
+                all_data.append(data_dict)
 
+        if len(all_combined) != 0:        
+            for combined_key in all_combined:
+                data_dict = {"Combined_Key" : combined_key}
+                all_data.append(data_dict)
 
+        # query db for each document containing data for specified location
+        for data_dict in all_data:
+            documents = collection.find(data_dict)
 
+            for document in documents:
+                cases = document[date_start]
+                data_dict[date_start] = cases
+
+                # for key in document:
+                #     if key == date_start:
+                #         cases = document[key]
+                #         data_dict[key] == cases
+
+        # JSON data
+        for data in all_data:
+            json_object = json.dumps(data, indent = 4)
+            print(json_object)
+
+        return "test"
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
