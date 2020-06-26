@@ -97,6 +97,14 @@ def query():
 
         print(all_countries)
 
+        db = client.a2test
+        collection = db[query_type]
+        
+        # check if query is by country/region (no provinces/states specified)
+        # if len(all_states) == 0:
+
+
+
 
 if __name__ == "__main__":
     app.run()
