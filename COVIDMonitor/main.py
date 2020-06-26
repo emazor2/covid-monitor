@@ -84,39 +84,33 @@ def search():
 @app.route('/query', methods=['GET', 'POST'])
 def query():
     if request.method == 'POST':
-        print("s")
         query_type = request.form["query_type"]
-        countries = request.form["countries"]
-        states = request.form["states"]
-        combined = request.form["combined"]
+        key_type = request.form["key_type"]
+        input_keys = request.form["key_list"]
         date_start = request.form["date_start"]
         date_end = request.form["date_end"]
 
-        all_countries = [x for x in countries.split('/')]
-        all_states = [x for x in states.split('/')]
-        all_combined = [x for x in combined.split('/')]
-
-        print(all_countries)
+        all_keys = [x for x in input_keys.split('/')]
 
         db = client.a2test
         collection = db[query_type]
 
         all_data = []
-        
+
         # check if query is by country/region, state/province, or combined_key
-        if len(all_states) != 0:
-            for state in all_states:
-                data_dict = {"Province_State": state}
-                all_data.append(data_dict)
-                
-        if len(all_countries) != 0:
-            for country in all_countries:
-                data_dict = {"Country_Region": country}
+        if key_type == "states":
+            for key in all_keys:
+                data_dict = {"Province_State": key}
                 all_data.append(data_dict)
 
-        if len(all_combined) != 0:        
-            for combined_key in all_combined:
-                data_dict = {"Combined_Key" : combined_key}
+        if key_type == "countries":
+            for key in all_keys:
+                data_dict = {"Country_Region": key}
+                all_data.append(data_dict)
+
+        if key_type == "combined":
+            for key in all_keys:
+                data_dict = {"Combined_Key": key}
                 all_data.append(data_dict)
 
         # query db for each document containing data for specified location
@@ -124,20 +118,21 @@ def query():
             documents = collection.find(data_dict)
 
             for document in documents:
-                cases = document[date_start]
-                data_dict[date_start] = cases
+                # cases = document[date_start]
+                # data_dict[date_start] = cases
 
-                # for key in document:
-                #     if key == date_start:
-                #         cases = document[key]
-                #         data_dict[key] == cases
+                for key in document:
+                    if date_start <= key <= date_end:
+                        data_dict[key] = document[key]
+        data_dict["query_type"] = query_type
 
         # JSON data
         for data in all_data:
-            json_object = json.dumps(data, indent = 4)
+            json_object = json.dumps(data, indent=4)
             print(json_object)
 
         return "test"
+
 
 if __name__ == "__main__":
     app.run(debug=True)

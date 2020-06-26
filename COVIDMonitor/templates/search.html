@@ -11,11 +11,12 @@
          </fieldset>
           <fieldset>
               <legend>Input keys to query by.</legend>
-              If multiple keys in one input, separate with /.
+              If multiple keys, separate with /.
               For example, if you would like to query by multiple countries Canada and Mexico input: Canada/Mexico <br>
-              <input type="text" name="countries"> Countries/Regions<br>
-              <input type="text" name="states"> States/Provinces<br>
-              <input type="text" name="combined"> Combined keys<br>
+              <input type="radio" name="key_type" value="countries" required> Countries/Regions<br>
+              <input type="radio" name="key_type" value="states"> States/Provinces<br>
+              <input type="radio" name="key_type" value="combined"> Combined keys<br>
+              <input type="text" name="key_list" required> Enter Countries/Regions or States/Provinces or Combined Keys<br>
           </fieldset>
          <fieldset>
             <legend>Choose a date range:</legend>
