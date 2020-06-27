@@ -117,32 +117,33 @@ def query():
                 all_data.append(data_dict)
 
         # query db for each document containing data for specified location
+        all_documents = []
         for data_dict in all_data:
             documents = collection.find(data_dict)
 
             for document in documents:
+                new_doc = {"Province_State": document.get("Province_State", ""),
+                           "Country_Region": document.get("Country_Region", ""),
+                           "Combined_Key": document.get("Combined_Key", ""), "Lat": document.get("Lat", ""),
+                           "Long_": document.get("Long_", "")}
                 # cases = document[date_start]
                 # data_dict[date_start] = cases
-                data_dict["Province_State"] = document.get("Province_State", "")
-                data_dict["Country_Region"] = document.get("Country_Region", "")
-                data_dict["Combined_Key"] = document.get("Combined_Key", "")
-                data_dict["Lat"] = document.get("Lat", "")
-                data_dict["Long_"] = document.get("Long_", "")
 
                 for key in document:
                     if date_start <= key <= date_end:
-                        data_dict[key] = document[key]
+                        new_doc[key] = document[key]
+                all_documents.append(new_doc)
         # data_dict["query_type"] = query_type
 
         # TODO: call correct display function depending on user input
         if data_format == "json":
-            return_data = display_json(all_data)
+            return_data = display_json(all_documents)
         elif data_format == "csv":
-            return_data = display_csv(all_data)
+            return_data = display_csv(all_documents)
         elif data_format == "text":
-            return_data = display_text(all_data)
+            return_data = display_text(all_documents)
         elif data_format == "line_plot":
-            return_data = display_plot(all_data, query_type, date_start, date_end)
+            return_data = display_plot(all_documents, query_type, date_start, date_end)
 
         return return_data
 
