@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from pymongo import MongoClient
 from io import TextIOWrapper
 import csv
@@ -6,6 +6,7 @@ import re
 import datetime
 import json
 import matplotlib.pyplot as plt
+import pandas as pd
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/uploaded_files'
@@ -122,6 +123,11 @@ def query():
             for document in documents:
                 # cases = document[date_start]
                 # data_dict[date_start] = cases
+                data_dict["Province_State"] = document.get("Province_State", "")
+                data_dict["Country_Region"] = document.get("Country_Region", "")
+                data_dict["Combined_Key"] = document.get("Combined_Key", "")
+                data_dict["Lat"] = document.get("Lat", "")
+                data_dict["Long_"] = document.get("Long_", "")
 
                 for key in document:
                     if date_start <= key <= date_end:
@@ -131,10 +137,10 @@ def query():
         # TODO: call correct display function depending on user input
         if data_format == "json":
             return_data = display_json(all_data)
-        # elif data_format == "csv":
-        #     return_data = display_csv(all_data)
-        # elif data_format == "text":
-        #     return_data = display_text(all_data)
+        elif data_format == "csv":
+            return_data = display_csv(all_data)
+        elif data_format == "text":
+            return_data = display_text(all_data)
         elif data_format == "line_plot":
             return_data = display_plot(all_data, query_type, date_start, date_end)
 
@@ -142,13 +148,23 @@ def query():
 
         # return "test"
 
+
 def display_json(all_data):
-    json_data = json.dumps(all_data, indent=4)
-    return json_data
+    json_data = json.dumps(all_data)
+    with open('out.json', 'w') as file:
+        json.dump(json_data, file)
+    return send_file('out.json', as_attachment=True)
 
-# def display_csv()
 
-# def display_text()
+def display_csv(all_data):
+    pd.DataFrame(all_data).to_csv('out.csv')
+    return send_file('out.csv', as_attachment=True)
+
+
+def display_text(all_data):
+    pd.DataFrame(all_data).to_html('out.html')
+    return send_file('out.html', as_attachment=True)
+
 
 def display_plot(all_data, query_type, date_start, date_end):
     # line graph
@@ -165,12 +181,9 @@ def display_plot(all_data, query_type, date_start, date_end):
     plt.ylabel("Number of Cases")
     plt.title("Changes in the number of " + query_type + " cases" + " from " + date_start + " to " + date_end)
     plt.legend(locations)
-
     plt.show()
     
     return 'test'
-
-
 
 
 if __name__ == "__main__":
