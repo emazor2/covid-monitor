@@ -5,6 +5,7 @@ import csv
 import re
 import datetime
 import json
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/uploaded_files'
@@ -89,6 +90,7 @@ def query():
         input_keys = request.form["key_list"]
         date_start = request.form["date_start"]
         date_end = request.form["date_end"]
+        data_format = request.form["return_format"]
 
         all_keys = [x for x in input_keys.split('/')]
 
@@ -124,14 +126,51 @@ def query():
                 for key in document:
                     if date_start <= key <= date_end:
                         data_dict[key] = document[key]
-        data_dict["query_type"] = query_type
+        # data_dict["query_type"] = query_type
 
-        # JSON data
-        for data in all_data:
-            json_object = json.dumps(data, indent=4)
-            print(json_object)
+        # TODO: call correct display function depending on user input
+        if data_format == "json":
+            return_data = display_json(all_data)
+        # elif data_format == "csv":
+        #     return_data = display_csv(all_data)
+        # elif data_format == "text":
+        #     return_data = display_text(all_data)
+        elif data_format == "line_plot":
+            return_data = display_plot(all_data, query_type, date_start, date_end)
 
-        return "test"
+        return return_data
+
+        # return "test"
+
+def display_json(all_data):
+    json_data = json.dumps(all_data, indent=4)
+    return json_data
+
+# def display_csv()
+
+# def display_text()
+
+def display_plot(all_data, query_type, date_start, date_end):
+    # line graph
+    locations = []
+    for data in all_data:
+        locations.append(data["Province_State"])
+        data.pop("Province_State")
+        dates = list(data.keys())
+        cases = list(data.values())
+
+        plt.plot(dates, cases)
+
+    plt.xlabel("Date")
+    plt.ylabel("Number of Cases")
+    plt.title("Changes in the number of " + query_type + " cases" + " from " + date_start + " to " + date_end)
+    plt.legend(locations)
+
+    plt.show()
+    
+    return 'test'
+
+
 
 
 if __name__ == "__main__":
