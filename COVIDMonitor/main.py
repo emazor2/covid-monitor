@@ -143,7 +143,7 @@ def query():
         elif data_format == "text":
             return_data = display_text(all_documents)
         elif data_format == "line_plot":
-            return_data = display_plot(all_documents, query_type, date_start, date_end)
+            return_data = display_plot(all_documents, query_type, key_type, date_start, date_end)
 
         return return_data
 
@@ -165,16 +165,67 @@ def display_text(all_data):
     return send_file('out.html', as_attachment=True)
 
 
-def display_plot(all_data, query_type, date_start, date_end):
+def display_plot(all_documents, query_type, key_type, date_start, date_end):
     # line graph
-    locations = []
-    for data in all_data:
-        locations.append(data["Province_State"])
-        data.pop("Province_State")
-        dates = list(data.keys())
-        cases = list(data.values())
+    if key_type == "states":
+        key = "Province_State"
+    elif key_type == "countries":
+        key = "Country_Region"
+    elif key_type == "combined":
+        key = "Combined_Key"
 
-        plt.plot(dates, cases)
+    locations = []
+    for document in all_documents:
+        location = document[key]
+        if location not in locations:
+            locations.append(document[key])
+        document.pop("Lat")
+        document.pop("Long_")
+
+    if key_type == "states" or key_type=="countries":
+        for location in locations:
+            combined_document = {}
+            combined_document[key] = location
+
+            all_dates = list(all_documents[0].keys())
+            all_dates.remove("Province_State")
+            all_dates.remove("Country_Region")
+            all_dates.remove("Combined_Key")
+
+            for date in all_dates:
+                combined_document[date] = 0
+
+            for date in all_dates:
+                for document in all_documents:
+                    if key in combined_document and key in document:
+                        key_1 = combined_document[key]
+                        key_2 = document[key]
+                        if date in combined_document and date in document and key_1 == key_2:
+
+                            cases = int(document[date])
+                            if date != "Country_Region" and date != "Province_State" and date != "Combined_Key":
+                                combined_document[date] += cases
+
+            cases = list(combined_document.values())
+            cases.pop(0)
+
+            plt.plot(all_dates, cases)
+
+    else:
+        for data in all_documents:
+
+            data.pop("Country_Region")
+            data.pop("Province_State")
+            data.pop("Combined_Key")
+
+            dates = list(data.keys())
+            cases = list(data.values())
+
+            int_cases = []
+            for case in cases:
+                int_cases.append(int(case))
+
+            plt.plot(dates, int_cases)
 
     plt.xlabel("Date")
     plt.ylabel("Number of Cases")
@@ -182,7 +233,7 @@ def display_plot(all_data, query_type, date_start, date_end):
     plt.legend(locations)
     plt.show()
     
-    return 'test'
+    return 'Line plot should pop up in a new window'
 
 
 if __name__ == "__main__":
