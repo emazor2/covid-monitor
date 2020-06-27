@@ -150,9 +150,7 @@ def query():
 
 
 def display_json(all_data):
-    json_data = json.dumps(all_data)
-    with open('out.json', 'w') as file:
-        json.dump(json_data, file)
+    pd.DataFrame(all_data).to_json('out.json', orient="records")
     return send_file('out.json', as_attachment=True)
 
 
