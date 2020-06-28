@@ -6,9 +6,9 @@ import re
 import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
+import sys
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = '/uploaded_files'
 client = MongoClient('localhost', 27017)
 
 
@@ -51,7 +51,7 @@ def upload_file():
                     continue
             reader = csv.DictReader(f, fieldnames=header)
             for data in reader:
-                collection.update({"Lat": data["Lat"], "Long_": data["Long_"]}, data, upsert=True)
+                collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")}, data, upsert=True)
 
         if filetype == "daily":
             for data in reader:
@@ -59,20 +59,24 @@ def upload_file():
                 date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
                 date = date_obj.strftime("%Y-%m-%d")
                 confirmed_collection = db['confirmed']
-                confirmed_collection.update({"Lat": data["Lat"], "Long_": data["Long_"]},
-                                            {"$set": {date: data["Confirmed"], "Combined_Key": data["Combined_Key"]}},
+                confirmed_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                                            {"$set": {date: data.get("Confirmed", ""),
+                                                      "Combined_Key": data.get("Combined_Key", "")}},
                                             upsert=True)
                 deaths_collection = db['deaths']
-                deaths_collection.update({"Lat": data["Lat"], "Long_": data["Long_"]},
-                                         {"$set": {date: data["Deaths"], "Combined_Key": data["Combined_Key"]}},
+                deaths_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                                         {"$set": {date: data.get("Deaths", ""),
+                                                   "Combined_Key": data.get("Combined_Key", "")}},
                                          upsert=True)
                 active_collection = db['active']
-                active_collection.update({"Lat": data["Lat"], "Long_": data["Long_"]},
-                                         {"$set": {date: data["Active"], "Combined_Key": data["Combined_Key"]}},
+                active_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                                         {"$set": {date: data.get("Active", ""),
+                                                   "Combined_Key": data.get("Combined_Key", "")}},
                                          upsert=True)
                 recovered_collection = db['recovered']
-                recovered_collection.update({"Lat": data["Lat"], "Long_": data["Long_"]},
-                                            {"$set": {date: data["Recovered"], "Combined_Key": data["Combined_Key"]}},
+                recovered_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                                            {"$set": {date: data.get("Recovered", ""),
+                                                      "Combined_Key": data.get("Combined_Key", "")}},
                                             upsert=True)
 
         return redirect(url_for('home'))
@@ -126,14 +130,11 @@ def query():
                            "Country_Region": document.get("Country_Region", ""),
                            "Combined_Key": document.get("Combined_Key", ""), "Lat": document.get("Lat", ""),
                            "Long_": document.get("Long_", "")}
-                # cases = document[date_start]
-                # data_dict[date_start] = cases
 
                 for key in document:
                     if date_start <= key <= date_end:
                         new_doc[key] = document[key]
                 all_documents.append(new_doc)
-        # data_dict["query_type"] = query_type
 
         # TODO: call correct display function depending on user input
         print(all_documents)
@@ -150,21 +151,32 @@ def query():
 
 
 def display_json(all_data):
-    pd.DataFrame(all_data).to_json('out.json', orient="records")
+    if "pytest" in sys.modules:
+        pd.DataFrame(all_data).to_json('COVIDMonitor/out.json', orient="records")
+    else:
+        pd.DataFrame(all_data).to_json('out.json', orient="records")
     return send_file('out.json', as_attachment=True)
 
 
 def display_csv(all_data):
-    pd.DataFrame(all_data).to_csv('out.csv')
+    if "pytest" in sys.modules:
+        pd.DataFrame(all_data).to_csv('COVIDMonitor/out.csv')
+    else:
+        pd.DataFrame(all_data).to_csv('out.csv')
     return send_file('out.csv', as_attachment=True)
 
 
 def display_text(all_data):
-    pd.DataFrame(all_data).to_html('out.html')
+    if "pytest" in sys.modules:
+        pd.DataFrame(all_data).to_html('COVIDMonitor/out.html')
+        print('error')
+    else:
+        pd.DataFrame(all_data).to_html('out.html')
     return send_file('out.html', as_attachment=True)
 
 
 def display_plot(all_documents, query_type, key_type, date_start, date_end):
+    plt.switch_backend('Agg')
     # line graph
     if key_type == "states":
         key = "Province_State"
@@ -181,7 +193,7 @@ def display_plot(all_documents, query_type, key_type, date_start, date_end):
         document.pop("Lat")
         document.pop("Long_")
 
-    if key_type == "states" or key_type=="countries":
+    if key_type == "states" or key_type == "countries":
         for location in locations:
             combined_document = {}
             combined_document[key] = location
@@ -230,9 +242,11 @@ def display_plot(all_documents, query_type, key_type, date_start, date_end):
     plt.ylabel("Number of Cases")
     plt.title("Changes in the number of " + query_type + " cases" + " from " + date_start + " to " + date_end)
     plt.legend(locations)
-    plt.show()
-    
-    return 'Line plot should pop up in a new window'
+    if "pytest" in sys.modules:
+        plt.savefig('COVIDMonitor/out.png')
+    else:
+        plt.savefig('out.png')
+    return send_file('out.png', as_attachment=True)
 
 
 if __name__ == "__main__":

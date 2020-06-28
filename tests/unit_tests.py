@@ -34,3 +34,65 @@ def test_uploader():
         home_data = render_template('home.html')
     assert response.data.decode("utf-8") == home_data
     assert response.status_code == 200
+
+
+def test_query_json():
+    data = {"query_type": "test",
+            "key_type": "countries",
+            "key_list": "Angola",
+            "date_start": "2020-06-15",
+            "date_end": "2020-06-15",
+            "return_format": "json"}
+    expected = [
+        {'Province_State': '', 'Country_Region': 'Angola', 'Combined_Key': '', 'Lat': '-11.2027', 'Long_': '17.8739',
+         '2020-06-15': '142'}]
+    json_file = pd.DataFrame(expected).to_json(orient="records")
+
+    response = app.test_client().post('/query', data=data, follow_redirects=True, content_type='multipart/form-data')
+    assert json_file == response.data.decode("utf-8")
+    assert response.status_code == 200
+
+
+def test_query_csv():
+    data = {"query_type": "test",
+            "key_type": "countries",
+            "key_list": "Angola",
+            "date_start": "2020-06-15",
+            "date_end": "2020-06-15",
+            "return_format": "csv"}
+    expected = [
+        {'Province_State': '', 'Country_Region': 'Angola', 'Combined_Key': '', 'Lat': '-11.2027', 'Long_': '17.8739',
+         '2020-06-15': '142'}]
+    csv_file = pd.DataFrame(expected).to_csv()
+
+    response = app.test_client().post('/query', data=data, follow_redirects=True, content_type='multipart/form-data')
+    assert csv_file == response.data.decode("utf-8")
+    assert response.status_code == 200
+
+
+def test_query_html():
+    data = {"query_type": "test",
+            "key_type": "countries",
+            "key_list": "Angola",
+            "date_start": "2020-06-15",
+            "date_end": "2020-06-15",
+            "return_format": "text"}
+    expected = [
+        {'Province_State': '', 'Country_Region': 'Angola', 'Combined_Key': '', 'Lat': '-11.2027', 'Long_': '17.8739',
+         '2020-06-15': '142'}]
+    html_file = pd.DataFrame(expected).to_html()
+
+    response = app.test_client().post('/query', data=data, follow_redirects=True, content_type='multipart/form-data')
+    assert html_file == response.data.decode("utf-8")
+    assert response.status_code == 200
+
+
+def test_query_line_plot():
+    data = {"query_type": "test",
+            "key_type": "countries",
+            "key_list": "Angola",
+            "date_start": "2020-06-15",
+            "date_end": "2020-06-15",
+            "return_format": "line_plot"}
+    response = app.test_client().post('/query', data=data, follow_redirects=True, content_type='multipart/form-data')
+    assert response.status_code == 200
