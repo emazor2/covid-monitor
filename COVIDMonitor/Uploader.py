@@ -43,7 +43,7 @@ class FileUploader:
 
 
 class TimeSeriesFileUploader(FileUploader):
-    def uploader(self):
+    def upload(self):
         collection = self.database[self.datatype]
         # replace the state and province headers so they are consistent
         for n, h in enumerate(self.header):
