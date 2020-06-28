@@ -1,0 +1,36 @@
+<html>
+   <body>
+      <form action = "http://localhost:5000/query" method = "POST"
+         enctype = "multipart/form-data">
+         <fieldset>
+             <legend>Choose a data to query:</legend>
+             <input type="radio" name="query_type" value="deaths" required> Deaths<br>
+             <input type="radio" name="query_type" value="confirmed"> Confirmed<br>
+             <input type="radio" name="query_type" value="active"> Active<br>
+             <input type="radio" name="query_type" value="recovered"> Recovered<br>
+         </fieldset>
+          <fieldset>
+              <legend>Input keys to query by.</legend>
+              If multiple keys, separate with /.
+              For example, if you would like to query by multiple countries Canada and Mexico input: Canada/Mexico <br>
+              <input type="radio" name="key_type" value="countries" required> Countries/Regions<br>
+              <input type="radio" name="key_type" value="states"> States/Provinces<br>
+              <input type="radio" name="key_type" value="combined"> Combined keys<br>
+              <input type="text" name="key_list" required> Enter Countries/Regions or States/Provinces or Combined Keys<br>
+          </fieldset>
+         <fieldset>
+            <legend>Choose a date range:</legend>
+            <input type="date" name="date_start" value="date_start" > Start of date range<br>
+            <input type="date" name="date_end" value="date_end" > End of date range<br>
+         </fieldset>
+          <fieldset>
+            <legend>Choose how your would like the data to be returned:</legend>
+            <input type="radio" name="return_format" value="json">JSON<br>
+            <input type="radio" name="return_format" value="csv">CSV<br>
+            <input type="radio" name="return_format" value="text">Text<br>
+            <input type="radio" name="return_format" value="line_plot">Line Plot<br>
+         </fieldset>
+         <input type = "submit"/>
+      </form>
+   </body>
+</html>
