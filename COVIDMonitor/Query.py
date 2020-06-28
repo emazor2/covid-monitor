@@ -54,13 +54,13 @@ class Query(Resource):
                         new_doc[key] = document[key]
                 all_documents.append(new_doc)
 
-        exporter = ExportFactory(data_format).getExporter(all_documents, query_type, key_type, date_start, date_end)
+        exporter = ExportBuilder(data_format).getExporter(all_documents, query_type, key_type, date_start, date_end)
         return_data = exporter.export_file()
 
         return return_data
 
 
-class ExportFactory:
+class ExportBuilder:
     def __init__(self, data_format):
         self.data_format = data_format
 
