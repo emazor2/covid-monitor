@@ -4,7 +4,6 @@ from io import TextIOWrapper
 import csv
 import re
 import datetime
-import json
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -27,6 +26,7 @@ def upload():
 def upload_file():
     if request.method == 'POST':
         f = TextIOWrapper(request.files['file'], encoding='utf-8')
+        print(request)
         filetype = request.form['file_type']
         datatype = request.form['data_type']
         reader = csv.DictReader(f)
@@ -86,12 +86,12 @@ def search():
 @app.route('/query', methods=['GET', 'POST'])
 def query():
     if request.method == 'POST':
-        query_type = request.form["query_type"]
-        key_type = request.form["key_type"]
-        input_keys = request.form["key_list"]
-        date_start = request.form["date_start"]
-        date_end = request.form["date_end"]
-        data_format = request.form["return_format"]
+        query_type = request.form['query_type']
+        key_type = request.form['key_type']
+        input_keys = request.form['key_list']
+        date_start = request.form['date_start']
+        date_end = request.form['date_end']
+        data_format = request.form['return_format']
 
         all_keys = [x for x in input_keys.split('/')]
 
@@ -136,6 +136,7 @@ def query():
         # data_dict["query_type"] = query_type
 
         # TODO: call correct display function depending on user input
+        print(all_documents)
         if data_format == "json":
             return_data = display_json(all_documents)
         elif data_format == "csv":
@@ -146,8 +147,6 @@ def query():
             return_data = display_plot(all_documents, query_type, key_type, date_start, date_end)
 
         return return_data
-
-        # return "test"
 
 
 def display_json(all_data):
