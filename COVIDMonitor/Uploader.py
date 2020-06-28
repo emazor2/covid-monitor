@@ -20,55 +20,73 @@ class Uploader(Resource):
         header = reader.fieldnames
         db = Database.getDb(self)
         if filetype == "time":
-            self.timeSeriesFileUploader(db, datatype, header, file)
+            uploader = TimeSeriesFileUploader(db, datatype, header, file, reader)
+            uploader.upload()
 
         elif filetype == "daily":
-            self.dailyFileUploader(db, reader)
+            uploader = DailyFileUploader(db, datatype, header, file, reader)
+            uploader.upload()
 
         return redirect(url_for('homepage'))
 
-    def timeSeriesFileUploader(self, db, datatype, header, file):
-        collection = db[datatype]
+
+class FileUploader:
+    def __init__(self, database, datatype, header, file, reader):
+        self.database = database
+        self.datatype = datatype
+        self.header = header
+        self.file = file
+        self.reader = reader
+
+    def upload(self):
+        pass
+
+
+class TimeSeriesFileUploader(FileUploader):
+    def uploader(self):
+        collection = self.database[self.datatype]
         # replace the state and province headers so they are consistent
-        for n, h in enumerate(header):
+        for n, h in enumerate(self.header):
             if "State" in h:
-                header[n] = 'Province_State'
+                self.header[n] = 'Province_State'
             elif "Country" in h:
-                header[n] = 'Country_Region'
+                self.header[n] = 'Country_Region'
             elif re.match("^[0-9//]*$", h):
                 m, d, y = [int(x) for x in h.split('/')]
                 y = 2000 + y
                 date = datetime.date(y, m, d)
-                header[n] = date.strftime("%Y-%m-%d")
+                self.header[n] = date.strftime("%Y-%m-%d")
             elif "Long" in h:
-                header[n] = "Long_"
+                self.header[n] = "Long_"
             else:
                 continue
-        reader = csv.DictReader(file, fieldnames=header)
+        reader = csv.DictReader(self.file, fieldnames=self.header)
         for data in reader:
             collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")}, data, upsert=True)
 
-    def dailyFileUploader(self, db, reader):
-        for data in reader:
+
+class DailyFileUploader(FileUploader):
+    def upload(self):
+        for data in self.reader:
             date_str = data["Last_Update"]
             date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
             date = date_obj.strftime("%Y-%m-%d")
-            confirmed_collection = db['confirmed']
+            confirmed_collection = self.database['confirmed']
             confirmed_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
                                         {"$set": {date: data.get("Confirmed", ""),
                                                   "Combined_Key": data.get("Combined_Key", "")}},
                                         upsert=True)
-            deaths_collection = db['deaths']
+            deaths_collection = self.database['deaths']
             deaths_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
                                      {"$set": {date: data.get("Deaths", ""),
                                                "Combined_Key": data.get("Combined_Key", "")}},
                                      upsert=True)
-            active_collection = db['active']
+            active_collection = self.database['active']
             active_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
                                      {"$set": {date: data.get("Active", ""),
                                                "Combined_Key": data.get("Combined_Key", "")}},
                                      upsert=True)
-            recovered_collection = db['recovered']
+            recovered_collection = self.database['recovered']
             recovered_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
                                         {"$set": {date: data.get("Recovered", ""),
                                                   "Combined_Key": data.get("Combined_Key", "")}},
