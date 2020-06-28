@@ -108,16 +108,11 @@ ell. Planning checkpoints, discussing solutions and constantly explaining the co
 
 # Design Patterns
 
-### Pattern 1
-    
-
--   Explanation:
-    
-
-### Pattern 2
-    
-
--   Explanation:
+### Pattern 1:  Builder Design Pattern
+We used a builder design pattern for the file exporting process. The builder design pattern is a useful pattern that takes in a common input to create a variety of outputs. For file querying, we find and parse a collection of data using the same key(s) but required a different output package. Since the initial data was the same between all file types, we chose a builder to create different types of output files using the same data to export the files.
+  
+### Pattern 2 : Strategy Design Pattern
+We used a strategy design pattern for the file importing process. The strategy design pattern is useful when different algorithms or behaviour is required depending on the context that is given to the program. For our file importing process, our context was the type of file, (daily or time series) and we needed to parse the file differently depending on said context. While the input is the same (the file) the algorithm for parsing the data to the database differs based on the file type. We also required the end result to be the same, which is to update the database using the data. Since we were parsing a common data source using different algorithms to achieve the same end result (update the database) we used the strategy design pattern.
     
 
 ### Pattern 3
