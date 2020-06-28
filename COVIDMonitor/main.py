@@ -44,6 +44,7 @@ api.add_resource(UploadPage, '/upload')
 class Uploader(Resource):
     def post(self):
         f = TextIOWrapper(request.files['file'], encoding='utf-8')
+        print(request)
         filetype = request.form['file_type']
         datatype = request.form['data_type']
         reader = csv.DictReader(f)
@@ -68,7 +69,7 @@ class Uploader(Resource):
                     continue
             reader = csv.DictReader(f, fieldnames=header)
             for data in reader:
-                collection.update({"Lat": data["Lat"], "Long_": data["Long_"]}, data, upsert=True)
+                collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")}, data, upsert=True)
 
         if filetype == "daily":
             for data in reader:
@@ -76,20 +77,24 @@ class Uploader(Resource):
                 date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
                 date = date_obj.strftime("%Y-%m-%d")
                 confirmed_collection = db['confirmed']
-                confirmed_collection.update({"Lat": data["Lat"], "Long_": data["Long_"]},
-                                            {"$set": {date: data["Confirmed"], "Combined_Key": data["Combined_Key"]}},
+                confirmed_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                                            {"$set": {date: data.get("Confirmed", ""),
+                                                      "Combined_Key": data.get("Combined_Key", "")}},
                                             upsert=True)
                 deaths_collection = db['deaths']
-                deaths_collection.update({"Lat": data["Lat"], "Long_": data["Long_"]},
-                                         {"$set": {date: data["Deaths"], "Combined_Key": data["Combined_Key"]}},
+                deaths_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                                         {"$set": {date: data.get("Deaths", ""),
+                                                   "Combined_Key": data.get("Combined_Key", "")}},
                                          upsert=True)
                 active_collection = db['active']
-                active_collection.update({"Lat": data["Lat"], "Long_": data["Long_"]},
-                                         {"$set": {date: data["Active"], "Combined_Key": data["Combined_Key"]}},
+                active_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                                         {"$set": {date: data.get("Active", ""),
+                                                   "Combined_Key": data.get("Combined_Key", "")}},
                                          upsert=True)
                 recovered_collection = db['recovered']
-                recovered_collection.update({"Lat": data["Lat"], "Long_": data["Long_"]},
-                                            {"$set": {date: data["Recovered"], "Combined_Key": data["Combined_Key"]}},
+                recovered_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                                            {"$set": {date: data.get("Recovered", ""),
+                                                      "Combined_Key": data.get("Combined_Key", "")}},
                                             upsert=True)
 
         return redirect(url_for('homepage'))
@@ -107,16 +112,25 @@ class SearchPage(Resource):
 
 api.add_resource(SearchPage, '/search')
 
-
-@app.route('/query', methods=['GET', 'POST'])
-def query():
-    if request.method == 'POST':
-        query_type = request.form["query_type"]
-        key_type = request.form["key_type"]
-        input_keys = request.form["key_list"]
-        date_start = request.form["date_start"]
-        date_end = request.form["date_end"]
-        data_format = request.form["return_format"]
+# @app.route('/query', methods=['GET', 'POST'])
+# def query():
+#     
+# def display_json(all_data):
+#    
+# def display_csv(all_data):
+#     
+# def display_text(all_data):
+#     
+# def display_plot(all_documents, query_type, key_type, date_start, date_end):
+#     
+class Query(Resource):
+    def post(self):
+        query_type = request.form['query_type']
+        key_type = request.form['key_type']
+        input_keys = request.form['key_list']
+        date_start = request.form['date_start']
+        date_end = request.form['date_end']
+        data_format = request.form['return_format']
 
         all_keys = [x for x in input_keys.split('/')]
 
@@ -160,7 +174,6 @@ def query():
                 all_documents.append(new_doc)
         # data_dict["query_type"] = query_type
 
-        # TODO: call correct display function depending on user input
         if data_format == "json":
             return_data = display_json(all_documents)
         elif data_format == "csv":
@@ -172,25 +185,32 @@ def query():
 
         return return_data
 
-        # return "test"
-
-
 def display_json(all_data):
-    pd.DataFrame(all_data).to_json('out.json', orient="records")
+    if "pytest" in sys.modules:
+        pd.DataFrame(all_data).to_json('COVIDMonitor/out.json', orient="records")
+    else:
+        pd.DataFrame(all_data).to_json('out.json', orient="records")
     return send_file('out.json', as_attachment=True)
 
-
 def display_csv(all_data):
-    pd.DataFrame(all_data).to_csv('out.csv')
+    if "pytest" in sys.modules:
+        pd.DataFrame(all_data).to_csv('COVIDMonitor/out.csv')
+    else:
+        pd.DataFrame(all_data).to_csv('out.csv')
     return send_file('out.csv', as_attachment=True)
 
 
 def display_text(all_data):
-    pd.DataFrame(all_data).to_html('out.html')
+    if "pytest" in sys.modules:
+        pd.DataFrame(all_data).to_html('COVIDMonitor/out.html')
+        print('error')
+    else:
+        pd.DataFrame(all_data).to_html('out.html')
     return send_file('out.html', as_attachment=True)
 
 
 def display_plot(all_documents, query_type, key_type, date_start, date_end):
+    plt.switch_backend('Agg')
     # line graph
     if key_type == "states":
         key = "Province_State"
@@ -207,7 +227,7 @@ def display_plot(all_documents, query_type, key_type, date_start, date_end):
         document.pop("Lat")
         document.pop("Long_")
 
-    if key_type == "states" or key_type=="countries":
+    if key_type == "states" or key_type == "countries":
         for location in locations:
             combined_document = {}
             combined_document[key] = location
@@ -261,6 +281,8 @@ def display_plot(all_documents, query_type, key_type, date_start, date_end):
     else:
         plt.savefig('out.png')
     return send_file('out.png', as_attachment=True)
+
+api.add_resource(Query, '/query')
 
 
 if __name__ == "__main__":
