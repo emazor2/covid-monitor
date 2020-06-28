@@ -48,120 +48,147 @@ class Query(Resource):
                            "Country_Region": document.get("Country_Region", ""),
                            "Combined_Key": document.get("Combined_Key", ""), "Lat": document.get("Lat", ""),
                            "Long_": document.get("Long_", "")}
-                # cases = document[date_start]
-                # data_dict[date_start] = cases
 
                 for key in document:
                     if date_start <= key <= date_end:
                         new_doc[key] = document[key]
                 all_documents.append(new_doc)
-        # data_dict["query_type"] = query_type
 
-        if data_format == "json":
-            return_data = display_json(all_documents)
-        elif data_format == "csv":
-            return_data = display_csv(all_documents)
-        elif data_format == "text":
-            return_data = display_text(all_documents)
-        elif data_format == "line_plot":
-            return_data = display_plot(all_documents, query_type, key_type, date_start, date_end)
+        exporter = ExportFactory(data_format).getExporter(all_documents, query_type, key_type, date_start, date_end)
+        return_data = exporter.export_file()
 
         return return_data
 
 
-def display_json(all_data):
-    if "pytest" in sys.modules:
-        pd.DataFrame(all_data).to_json('COVIDMonitor/out.json', orient="records")
-    else:
-        pd.DataFrame(all_data).to_json('out.json', orient="records")
-    return send_file('out.json', as_attachment=True)
+class ExportFactory:
+    def __init__(self, data_format):
+        self.data_format = data_format
+
+    def getExporter(self, all_documents, query_type, key_type, date_start, date_end):
+        if self.data_format == "json":
+            return JsonExporter(all_documents)
+        elif self.data_format == "csv":
+            return CsvExporter(all_documents)
+        elif self.data_format == "text":
+            return HtmlExporter(all_documents)
+        elif self.data_format == "line_plot":
+            return PlotExporter(all_documents, query_type, key_type, date_start, date_end)
 
 
-def display_csv(all_data):
-    if "pytest" in sys.modules:
-        pd.DataFrame(all_data).to_csv('COVIDMonitor/out.csv')
-    else:
-        pd.DataFrame(all_data).to_csv('out.csv')
-    return send_file('out.csv', as_attachment=True)
+class Exporter:
+    def __init__(self, all_documents):
+        self.all_documents = all_documents
+
+    def export_file(self):
+        pass
 
 
-def display_text(all_data):
-    if "pytest" in sys.modules:
-        pd.DataFrame(all_data).to_html('COVIDMonitor/out.html')
-        print('error')
-    else:
-        pd.DataFrame(all_data).to_html('out.html')
-    return send_file('out.html', as_attachment=True)
+class JsonExporter(Exporter):
+    def export_file(self):
+        if "pytest" in sys.modules:
+            pd.DataFrame(self.all_documents).to_json('COVIDMonitor/out.json', orient="records")
+        else:
+            pd.DataFrame(self.all_documents).to_json('out.json', orient="records")
+        return send_file('out.json', as_attachment=True)
 
 
-def display_plot(all_documents, query_type, key_type, date_start, date_end):
-    plt.switch_backend('Agg')
-    # line graph
-    if key_type == "states":
-        key = "Province_State"
-    elif key_type == "countries":
-        key = "Country_Region"
-    elif key_type == "combined":
-        key = "Combined_Key"
+class CsvExporter(Exporter):
+    def export_file(self):
+        if "pytest" in sys.modules:
+            pd.DataFrame(self.all_documents).to_csv('COVIDMonitor/out.csv')
+        else:
+            pd.DataFrame(self.all_documents).to_csv('out.csv')
+        return send_file('out.csv', as_attachment=True)
 
-    locations = []
-    for document in all_documents:
-        location = document[key]
-        if location not in locations:
-            locations.append(document[key])
-        document.pop("Lat")
-        document.pop("Long_")
 
-    if key_type == "states" or key_type == "countries":
-        for location in locations:
-            combined_document = {key: location}
+class HtmlExporter(Exporter):
+    def export_file(self):
+        print(self.all_documents)
+        if "pytest" in sys.modules:
+            pd.DataFrame(self.all_documents).to_html('COVIDMonitor/out.html')
+        else:
+            pd.DataFrame(self.all_documents).to_html('out.html')
+        return send_file('out.html', as_attachment=True)
 
-            all_dates = list(all_documents[0].keys())
-            all_dates.remove("Province_State")
-            all_dates.remove("Country_Region")
-            all_dates.remove("Combined_Key")
 
-            for date in all_dates:
-                combined_document[date] = 0
+class PlotExporter(Exporter):
+    def __init__(self, all_documents, query_type, key_type, date_start, date_end):
+        super().__init__(all_documents)
+        self.query_type = query_type
+        self.key_type = key_type
+        self.date_start = date_start
+        self.date_end = date_end
 
-            for date in all_dates:
-                for document in all_documents:
-                    if key in combined_document and key in document:
-                        key_1 = combined_document[key]
-                        key_2 = document[key]
-                        if date in combined_document and date in document and key_1 == key_2:
+    def export_file(self):
+        plt.switch_backend('Agg')
+        # line graph
+        if self.key_type == "states":
+            key = "Province_State"
+        elif self.key_type == "countries":
+            key = "Country_Region"
+        elif self.key_type == "combined":
+            key = "Combined_Key"
 
-                            cases = int(document[date])
-                            if date != "Country_Region" and date != "Province_State" and date != "Combined_Key":
-                                combined_document[date] += cases
+        locations = []
+        for document in self.all_documents:
+            location = document[key]
+            if location not in locations:
+                locations.append(document[key])
+            document.pop("Lat")
+            document.pop("Long_")
 
-            cases = list(combined_document.values())
-            cases.pop(0)
+        if self.key_type == "states" or self.key_type == "countries":
+            for location in locations:
+                combined_document = {key: location}
 
-            plt.plot(all_dates, cases)
+                all_dates = list(self.all_documents[0].keys())
+                all_dates.remove("Province_State")
+                all_dates.remove("Country_Region")
+                all_dates.remove("Combined_Key")
 
-    else:
-        for data in all_documents:
+                for date in all_dates:
+                    combined_document[date] = 0
 
-            data.pop("Country_Region")
-            data.pop("Province_State")
-            data.pop("Combined_Key")
+                for date in all_dates:
+                    for document in self.all_documents:
+                        if key in combined_document and key in document:
+                            key_1 = combined_document[key]
+                            key_2 = document[key]
+                            if date in combined_document and date in document and key_1 == key_2:
 
-            dates = list(data.keys())
-            cases = list(data.values())
+                                cases = int(document[date])
+                                if date != "Country_Region" and date != "Province_State" and date != "Combined_Key":
+                                    combined_document[date] += cases
 
-            int_cases = []
-            for case in cases:
-                int_cases.append(int(case))
+                cases = list(combined_document.values())
+                cases.pop(0)
 
-            plt.plot(dates, int_cases)
+                plt.plot(all_dates, cases)
 
-    plt.xlabel("Date")
-    plt.ylabel("Number of Cases")
-    plt.title("Changes in the number of " + query_type + " cases" + " from " + date_start + " to " + date_end)
-    plt.legend(locations)
-    if "pytest" in sys.modules:
-        plt.savefig('COVIDMonitor/out.png')
-    else:
-        plt.savefig('out.png')
-    return send_file('out.png', as_attachment=True)
+        else:
+            for data in self.all_documents:
+
+                data.pop("Country_Region")
+                data.pop("Province_State")
+                data.pop("Combined_Key")
+
+                dates = list(data.keys())
+                cases = list(data.values())
+
+                int_cases = []
+                for case in cases:
+                    int_cases.append(int(case))
+
+                plt.plot(dates, int_cases)
+
+        plt.xlabel("Date")
+        plt.ylabel("Number of Cases")
+        plt.title(
+            "Changes in the number of " + self.query_type + " cases" + " from " + self.date_start + " to " + self.date_end)
+        plt.legend(locations)
+
+        if "pytest" in sys.modules:
+            plt.savefig('COVIDMonitor/out.png')
+        else:
+            plt.savefig('out.png')
+        return send_file('out.png', as_attachment=True)
