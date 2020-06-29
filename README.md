@@ -116,13 +116,6 @@ We used a builder design pattern for the file exporting process. The builder des
 We used a strategy design pattern for the file importing process. The strategy design pattern is useful when different algorithms or behaviour is required depending on the context that is given to the program. For our file importing process, our context was the type of file, (daily or time series) and we needed to parse the file differently depending on said context. While the input is the same (the file) the algorithm for parsing the data to the database differs based on the file type. We also required the end result to be the same, which is to update the database using the data. Since we were parsing a common data source using different algorithms to achieve the same end result (update the database) we used the strategy design pattern.
 
 [Strategy Pattern Diagram](https://i.imgur.com/K9mX5jO.png)
-
-### Pattern 3
-    
-
--   Explanation:
-    
-
   
 
 ### Code Craftsmanship
