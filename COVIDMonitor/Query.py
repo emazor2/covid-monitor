@@ -112,7 +112,8 @@ class HtmlExporter(Exporter):
 
 
 class PlotExporter(Exporter):
-    def __init__(self, all_documents, query_type, key_type, date_start, date_end):
+    def __init__(self, all_documents, query_type, 
+                key_type, date_start, date_end):
         super().__init__(all_documents)
         self.query_type = query_type
         self.key_type = key_type
