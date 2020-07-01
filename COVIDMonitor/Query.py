@@ -139,7 +139,7 @@ class PlotExporter(Exporter):
 
         # locations = self.GetLocations(key)
         locations = []
-        self.getLocations(key, locations)
+        self.GetLocations(key, locations)
         # for document in self.all_documents:
         #     location = document[key]
         #     if location not in locations:
@@ -148,7 +148,7 @@ class PlotExporter(Exporter):
         #     document.pop("Long_")
 
         if self.key_type == "states" or self.key_type == "countries":
-            self.PlotStatesAndCountries(locations, key)
+            self.PlotStatesAndCountries(key, locations)
             # for location in locations:
             #     combined_document = {key: location}
 
@@ -230,9 +230,9 @@ class PlotExporter(Exporter):
         # return locations
     
     def PlotStatesAndCountries(self, key, locations):
+        print(locations)
         for location in locations:
             print(key)
-            print(location)
             combined_document = {key: location}
 
             all_dates = self.GetAllDates()
