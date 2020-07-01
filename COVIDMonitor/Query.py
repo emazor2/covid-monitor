@@ -110,7 +110,6 @@ class CsvExporter(Exporter):
 
 class HtmlExporter(Exporter):
     def export_file(self):
-        print(self.all_documents)
         if "pytest" in sys.modules:
             pd.DataFrame(self.all_documents).to_html('COVIDMonitor/out.html')
         else:
@@ -129,119 +128,45 @@ class PlotExporter(Exporter):
 
     def export_file(self):
         plt.switch_backend('Agg')
-        # key = self.GetKey()
+        key = self.GetKey()
+
+        locations = self.GetLocations(key)
+
+        if self.key_type == "states" or self.key_type == "countries":
+            self.PlotStatesAndCountries(key, locations)
+
+        else:
+            self.PlotCombinedKey(self.all_documents)
+        return self.AddPlotDetails(locations)
+
+    def GetKey(self):
         if self.key_type == "states":
             key = "Province_State"
         elif self.key_type == "countries":
             key = "Country_Region"
         elif self.key_type == "combined":
             key = "Combined_Key"
-
-        # locations = self.GetLocations(key)
-        locations = []
-        self.GetLocations(key, locations)
-        # for document in self.all_documents:
-        #     location = document[key]
-        #     if location not in locations:
-        #         locations.append(document[key])
-        #     document.pop("Lat")
-        #     document.pop("Long_")
-
-        if self.key_type == "states" or self.key_type == "countries":
-            self.PlotStatesAndCountries(key, locations)
-            # for location in locations:
-            #     combined_document = {key: location}
-
-            #     all_dates = list(self.all_documents[0].keys())
-            #     all_dates.remove("Province_State")
-            #     all_dates.remove("Country_Region")
-            #     all_dates.remove("Combined_Key")
-
-            #     for date in all_dates:
-            #         combined_document[date] = 0
-
-            #     for date in all_dates:
-            #         for document in self.all_documents:
-            #             if key in combined_document and key in document:
-            #                 key_1 = combined_document[key]
-            #                 key_2 = document[key]
-            #                 if date in combined_document and \
-            #                     date in document and \
-            #                         key_1 == key_2:
-            #                     cases = int(document[date])
-            #                     if date != "Country_Region" and \
-            #                         date != "Province_State" and \
-            #                             date != "Combined_Key":
-            #                         combined_document[date] += cases
-
-            #     cases = list(combined_document.values())
-            #     cases.pop(0)
-
-            #     plt.plot(all_dates, cases)
-
-        else:
-            self.PlotCombinedKey(self.all_documents)
-            # for data in self.all_documents:
-
-            #     data.pop("Country_Region")
-            #     data.pop("Province_State")
-            #     data.pop("Combined_Key")
-
-            #     dates = list(data.keys())
-            #     cases = list(data.values())
-
-            #     int_cases = []
-            #     for case in cases:
-            #         int_cases.append(int(case))
-
-            #     plt.plot(dates, int_cases)
-
-        self.AddPlotDetails(locations)
-        # plt.xlabel("Date")
-        # plt.ylabel("Number of Cases")
-        # plt.title(
-        #     "Changes in the number of " + self.query_type +
-        #     " cases" + " from " + self.date_start +
-        #     " to " + self.date_end)
-        # plt.legend(locations)
-        # if "pytest" in sys.modules:
-        #     plt.savefig('COVIDMonitor/out.png')
-        # else:
-        #     plt.savefig('out.png')
-        # return send_file('out.png', as_attachment=True)
-  
-    # def GetKey(self):
-    #     if self.key_type == "states":
-    #         key = "Province_State"
-    #     elif self.key_type == "countries":
-    #         key = "Country_Region"
-    #     elif self.key_type == "combined":
-    #         key = "Combined_Key"
-    #     return key
+        return key
     
-    def GetLocations(self, key, locations):
-        # locations = []
+    def GetLocations(self, key):
+        locations = []
         for document in self.all_documents:
             location = document[key]
             if location not in locations:
                 locations.append(document[key])
             document.pop("Lat")
             document.pop("Long_")
-        # return locations
+        return locations
     
     def PlotStatesAndCountries(self, key, locations):
-        print(locations)
         for location in locations:
-            print(key)
+            print(location)
             combined_document = {key: location}
 
             all_dates = self.GetAllDates()
-            # all_dates = list(self.all_documents[0].keys())
-            # all_dates.remove("Province_State")
-            # all_dates.remove("Country_Region")
-            # all_dates.remove("Combined_Key")
 
             for date in all_dates:
+                print(date)
                 combined_document[date] = 0
 
             for date in all_dates:
@@ -260,7 +185,7 @@ class PlotExporter(Exporter):
 
             cases = list(combined_document.values())
             cases.pop(0)
-
+            print(cases)
             plt.plot(all_dates, cases)
 
     def GetAllDates(self):
