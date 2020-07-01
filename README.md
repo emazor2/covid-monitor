@@ -31,7 +31,7 @@ Our initial process was to have 2 sessions to pair program part 3 and part 4. We
 ### 3. Testing/Error Fix (27/6/2020)
 -   (Driver: Emily, Navigator: Da Eun) 
 	-   Checkpoint 1: Fix the way matplotlib displays the data when multiple locations are queried
--   Driver: Da Eun, Navigator: Emily
+-   (Driver: Da Eun, Navigator: Emily)
 	-   Check point 2: Implement unit tests for home, upload and search
 	-   Check point 3: Implement unit tests for uploader
 	-   Check point 4: Implement unit tests for query
