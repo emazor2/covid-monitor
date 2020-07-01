@@ -231,6 +231,8 @@ class PlotExporter(Exporter):
     
     def PlotStatesAndCountries(self, key, locations):
         for location in locations:
+            print(key)
+            print(location)
             combined_document = {key: location}
 
             all_dates = self.GetAllDates()
