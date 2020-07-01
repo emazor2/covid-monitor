@@ -12,6 +12,8 @@ from COVIDMonitor.Database import Database
 
 class Uploader(Resource):
     def post(self):
+        """Interacts with the database to add/update data when
+        a file is uploaded."""
         file = TextIOWrapper(request.files['file'], encoding='utf-8')
         print(request)
         filetype = request.form['file_type']
@@ -20,7 +22,8 @@ class Uploader(Resource):
         header = reader.fieldnames
         db = Database.getDb(self)
         if filetype == "time":
-            uploader = TimeSeriesFileUploader(db, datatype, header, file, reader)
+            uploader = TimeSeriesFileUploader(
+                db, datatype, header, file, reader)
             uploader.upload()
 
         elif filetype == "daily":
@@ -44,6 +47,7 @@ class FileUploader:
 
 class TimeSeriesFileUploader(FileUploader):
     def upload(self):
+        """Updates the database when a Time Series file is uploaded."""
         collection = self.database[self.datatype]
         # replace the state and province headers so they are consistent
         for n, h in enumerate(self.header):
@@ -62,32 +66,49 @@ class TimeSeriesFileUploader(FileUploader):
                 continue
         reader = csv.DictReader(self.file, fieldnames=self.header)
         for data in reader:
-            collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")}, data, upsert=True)
+            collection.update(
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                data,
+                upsert=True)
 
 
 class DailyFileUploader(FileUploader):
     def upload(self):
+        """Updates the database when a Daily Report file is uploaded."""
         for data in self.reader:
             date_str = data["Last_Update"]
-            date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+            date_obj = datetime.datetime.strptime(
+                date_str, "%Y-%m-%d %H:%M:%S")
             date = date_obj.strftime("%Y-%m-%d")
             confirmed_collection = self.database['confirmed']
-            confirmed_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
-                                        {"$set": {date: data.get("Confirmed", ""),
-                                                  "Combined_Key": data.get("Combined_Key", "")}},
-                                        upsert=True)
+            confirmed_collection.update(
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                {"$set": {
+                            date: data.get("Confirmed", ""),
+                            "Combined_Key": data.get("Combined_Key", "")
+                        }},
+                upsert=True)
             deaths_collection = self.database['deaths']
-            deaths_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
-                                     {"$set": {date: data.get("Deaths", ""),
-                                               "Combined_Key": data.get("Combined_Key", "")}},
-                                     upsert=True)
+            deaths_collection.update(
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                {"$set": {
+                            date: data.get("Deaths", ""),
+                            "Combined_Key": data.get("Combined_Key", "")
+                        }},
+                upsert=True)
             active_collection = self.database['active']
-            active_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
-                                     {"$set": {date: data.get("Active", ""),
-                                               "Combined_Key": data.get("Combined_Key", "")}},
-                                     upsert=True)
+            active_collection.update(
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                {"$set": {
+                            date: data.get("Active", ""),
+                            "Combined_Key": data.get("Combined_Key", "")
+                        }},
+                upsert=True)
             recovered_collection = self.database['recovered']
-            recovered_collection.update({"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
-                                        {"$set": {date: data.get("Recovered", ""),
-                                                  "Combined_Key": data.get("Combined_Key", "")}},
-                                        upsert=True)
+            recovered_collection.update(
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                {"$set": {
+                            date: data.get("Recovered", ""),
+                            "Combined_Key": data.get("Combined_Key", "")
+                        }},
+                upsert=True)

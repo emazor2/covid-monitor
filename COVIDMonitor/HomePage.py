@@ -4,5 +4,6 @@ from flask_restful import Resource
 
 class HomePage(Resource):
     def get(self):
+        """Displays the home page."""
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('home.html'), 200, headers)
