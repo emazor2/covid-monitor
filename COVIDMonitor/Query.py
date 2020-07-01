@@ -129,16 +129,17 @@ class PlotExporter(Exporter):
 
     def export_file(self):
         plt.switch_backend('Agg')
-        key = self.GetKey()
-        # if self.key_type == "states":
-        #     key = "Province_State"
-        # elif self.key_type == "countries":
-        #     key = "Country_Region"
-        # elif self.key_type == "combined":
-        #     key = "Combined_Key"
+        # key = self.GetKey()
+        if self.key_type == "states":
+            key = "Province_State"
+        elif self.key_type == "countries":
+            key = "Country_Region"
+        elif self.key_type == "combined":
+            key = "Combined_Key"
 
-        locations = self.GetLocations(key) 
-        # locations = []
+        # locations = self.GetLocations(key)
+        locations = []
+        self.getLocations(key, locations)
         # for document in self.all_documents:
         #     location = document[key]
         #     if location not in locations:
@@ -209,30 +210,30 @@ class PlotExporter(Exporter):
         #     plt.savefig('out.png')
         # return send_file('out.png', as_attachment=True)
   
-    def GetKey(self):
-        if self.key_type == "states":
-            key = "Province_State"
-        elif self.key_type == "countries":
-            key = "Country_Region"
-        elif self.key_type == "combined":
-            key = "Combined_Key"
-        return key
+    # def GetKey(self):
+    #     if self.key_type == "states":
+    #         key = "Province_State"
+    #     elif self.key_type == "countries":
+    #         key = "Country_Region"
+    #     elif self.key_type == "combined":
+    #         key = "Combined_Key"
+    #     return key
     
-    def GetLocations(self, key):
-        locations = []
+    def GetLocations(self, key, locations):
+        # locations = []
         for document in self.all_documents:
             location = document[key]
             if location not in locations:
                 locations.append(document[key])
             document.pop("Lat")
             document.pop("Long_")
-        return locations
+        # return locations
     
     def PlotStatesAndCountries(self, key, locations):
         for location in locations:
             combined_document = {key: location}
 
-            all_dates = self.GetAllDates()     
+            all_dates = self.GetAllDates()
             # all_dates = list(self.all_documents[0].keys())
             # all_dates.remove("Province_State")
             # all_dates.remove("Country_Region")
