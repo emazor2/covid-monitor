@@ -12,6 +12,8 @@ from COVIDMonitor.Database import Database
 
 class Uploader(Resource):
     def post(self):
+        """Interacts with the database to add/update data when
+        a file is uploaded."""
         file = TextIOWrapper(request.files['file'], encoding='utf-8')
         print(request)
         filetype = request.form['file_type']
@@ -45,6 +47,7 @@ class FileUploader:
 
 class TimeSeriesFileUploader(FileUploader):
     def upload(self):
+        """Updates the database when a Time Series file is uploaded."""
         collection = self.database[self.datatype]
         # replace the state and province headers so they are consistent
         for n, h in enumerate(self.header):
@@ -71,9 +74,11 @@ class TimeSeriesFileUploader(FileUploader):
 
 class DailyFileUploader(FileUploader):
     def upload(self):
+        """Updates the database when a Daily Report file is uploaded."""
         for data in self.reader:
             date_str = data["Last_Update"]
-            date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+            date_obj = datetime.datetime.strptime(
+                date_str, "%Y-%m-%d %H:%M:%S")
             date = date_obj.strftime("%Y-%m-%d")
             confirmed_collection = self.database['confirmed']
             confirmed_collection.update(

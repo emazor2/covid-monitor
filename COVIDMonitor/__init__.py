@@ -16,6 +16,7 @@ def create_app():
 
 
 def add_routes(api):
+    """Adds the resource routes to the app."""
     api.add_resource(HomePage, '/')
     api.add_resource(UploadPage, '/upload')
     api.add_resource(Uploader, '/uploader')
