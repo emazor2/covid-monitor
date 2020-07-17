@@ -112,7 +112,7 @@ class JsonExporter(Exporter):
                 'COVIDMonitor/out.json', orient="records")
         else:
             pd.DataFrame(self.all_documents).to_json(
-                'out.json', orient="records")
+                'COVIDMonitor/out.json', orient="records")
         return send_file('out.json', as_attachment=True)
 
 
@@ -122,7 +122,7 @@ class CsvExporter(Exporter):
         if "pytest" in sys.modules:
             pd.DataFrame(self.all_documents).to_csv('COVIDMonitor/out.csv')
         else:
-            pd.DataFrame(self.all_documents).to_csv('out.csv')
+            pd.DataFrame(self.all_documents).to_csv('COVIDMonitor/out.csv')
         return send_file('out.csv', as_attachment=True)
 
 
@@ -132,7 +132,7 @@ class HtmlExporter(Exporter):
         if "pytest" in sys.modules:
             pd.DataFrame(self.all_documents).to_html('COVIDMonitor/out.html')
         else:
-            pd.DataFrame(self.all_documents).to_html('out.html')
+            pd.DataFrame(self.all_documents).to_html('COVIDMonitor/out.html')
         return send_file('out.html', as_attachment=True)
 
 
@@ -276,5 +276,5 @@ class PlotExporter(Exporter):
         if "pytest" in sys.modules:
             plt.savefig('COVIDMonitor/out.png')
         else:
-            plt.savefig('out.png')
+            plt.savefig('COVIDMonitor/out.png')
         return send_file('out.png', as_attachment=True)
