@@ -82,7 +82,7 @@ class DailyFileUploader(FileUploader):
             date = date_obj.strftime("%Y-%m-%d")
             confirmed_collection = self.database['confirmed']
             confirmed_collection.update(
-                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", ""), "Province_State": data.get("Province_State", ""), "Country_Region": data.get("Country_Region", "")},
                 {"$set": {
                             date: data.get("Confirmed", ""),
                             "Combined_Key": data.get("Combined_Key", "")
@@ -90,7 +90,7 @@ class DailyFileUploader(FileUploader):
                 upsert=True)
             deaths_collection = self.database['deaths']
             deaths_collection.update(
-                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", ""), "Province_State": data.get("Province_State", ""), "Country_Region": data.get("Country_Region", "")},
                 {"$set": {
                             date: data.get("Deaths", ""),
                             "Combined_Key": data.get("Combined_Key", "")
@@ -98,7 +98,7 @@ class DailyFileUploader(FileUploader):
                 upsert=True)
             active_collection = self.database['active']
             active_collection.update(
-                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", ""), "Province_State": data.get("Province_State", ""), "Country_Region": data.get("Country_Region", "")},
                 {"$set": {
                             date: data.get("Active", ""),
                             "Combined_Key": data.get("Combined_Key", "")
@@ -106,7 +106,7 @@ class DailyFileUploader(FileUploader):
                 upsert=True)
             recovered_collection = self.database['recovered']
             recovered_collection.update(
-                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", "")},
+                {"Lat": data.get("Lat", ""), "Long_": data.get("Long_", ""), "Province_State": data.get("Province_State", ""), "Country_Region": data.get("Country_Region", "")},
                 {"$set": {
                             date: data.get("Recovered", ""),
                             "Combined_Key": data.get("Combined_Key", "")
