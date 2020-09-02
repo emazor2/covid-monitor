@@ -1,3 +1,51 @@
+# Instructions:
+
+### Instructions for Initial Setup:
+
+1.  Install the packages/modules/frameworks: pymongo, matplotlib, and pandas.
+    
+2.  Install MongoDB according to your OS: [https://docs.mongodb.com/manual/administration/install-community/](https://docs.mongodb.com/manual/administration/install-community/)
+    
+
+### Instructions for Use:
+#### Before running `main.py`:
+1.  Connect to MongoDB by running `mongo` in terminal.
+    
+2.  Use the command `use a2test` in the mongodb shell to create the database a2test. 
+    
+3. Run main.test and open the locally served program in chrome.
+
+#### Begin by uploading a Time Series or Daily file:
+
+1.  Click Upload from home page.
+    
+2.  Click Choose File and upload the desired file (must be .csv extension).
+    
+3.  Select Time Series or Daily format type.
+    
+4.  Select the information type (confirmed, deaths, recovered, active, choose All if the format type is Daily) of data in the file. Only one type can be chosen.
+5.  Click Upload File.
+
+Next, you can continue uploading more files (Time Series or Daily Report), or query data from the uploaded file(s).
+
+#### To query data:
+
+1.  Click Search from home page.
+    
+2.  Select the information type of data to query (confirmed, deaths, recovered, active). Only one type can be chosen.
+    
+3.  Input the Countries/Regions, States/Provinces, or Combined Keys to query. Only one type can be chosen. For multiple inputs separate the inputs using '/'. For example, for querying Canada and Mexico, input `Canada/Mexico`.
+    
+4.  Input the dates for your desired date range.
+    
+5.  Select the format for the data to be returned. Text type will return an html file.
+
+6. Click Submit and save file.
+
+### Testing Instructions
+1.  The mongodb database and a2test must be running for the tests to run correctly. To set up the database see the beginning of Instructions section above. 
+2. Run tests.
+
 # Pair Programming
 
 ## Features to Pair Program:
@@ -82,53 +130,3 @@ We used a strategy design pattern for the file importing process. The strategy d
 
 -   Tools: Linters (flake8), IDEs (PyCharm, Visual Studio with Python add on)
     
-
-  
-
-# Instructions:
-
-### Instructions for Initial Setup:
-
-1.  Install the packages/modules/frameworks: pymongo, matplotlib, and pandas.
-    
-2.  Install MongoDB according to your OS: [https://docs.mongodb.com/manual/administration/install-community/](https://docs.mongodb.com/manual/administration/install-community/)
-    
-
-### Instructions for Use:
-#### Before running `main.py`:
-1.  Connect to MongoDB by running `mongo` in terminal.
-    
-2.  Use the command `use a2test` in the mongodb shell to create the database a2test. 
-    
-3. Run main.test and open the locally served program in chrome.
-
-#### Begin by uploading a Time Series or Daily file:
-
-1.  Click Upload from home page.
-    
-2.  Click Choose File and upload the desired file (must be .csv extension).
-    
-3.  Select Time Series or Daily format type.
-    
-4.  Select the information type (confirmed, deaths, recovered, active, choose All if the format type is Daily) of data in the file. Only one type can be chosen.
-5.  Click Upload File.
-
-Next, you can continue uploading more files (Time Series or Daily Report), or query data from the uploaded file(s).
-
-#### To query data:
-
-1.  Click Search from home page.
-    
-2.  Select the information type of data to query (confirmed, deaths, recovered, active). Only one type can be chosen.
-    
-3.  Input the Countries/Regions, States/Provinces, or Combined Keys to query. Only one type can be chosen. For multiple inputs separate the inputs using '/'. For example, for querying Canada and Mexico, input `Canada/Mexico`.
-    
-4.  Input the dates for your desired date range.
-    
-5.  Select the format for the data to be returned. Text type will return an html file.
-
-6. Click Submit and save file.
-
-### Testing Instructions
-1.  The mongodb database and a2test must be running for the tests to run correctly. To set up the database see the beginning of Instructions section above. 
-2. Run tests.
